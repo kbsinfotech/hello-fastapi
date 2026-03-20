@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: hello-fastapi-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: public
+  tls:
+    - hosts:
+        - hello.kbscloud.space
+      secretName: hello-fastapi-tls
+  rules:
+    - host: hello.kbscloud.space
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: hello-fastapi-svc
+                port:
+                  number: 80
