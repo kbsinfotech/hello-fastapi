@@ -1,0 +1,33 @@
+name: Build-Scan-Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_scan_push:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - run: docker build -t ghcr.io/${{ github.repository_owner }}/hello-fastapi:latest .
+
+      - uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ghcr.io/${{ github.repository_owner }}/hello-fastapi:latest
+          format: table
+          exit-code: 0
+
+      - run: docker push ghcr.io/${{ github.repository_owner }}/hello-fastapi:latest
